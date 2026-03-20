@@ -68,6 +68,12 @@ class SelectOption:
         self.label = label
         self.value = value
         self.description = description
+        # Auto-parse custom emoji strings like <:name:id> or <a:name:id>
+        if emoji and isinstance(emoji, str) and emoji.startswith("<"):
+            try:
+                emoji = hikari.CustomEmoji.parse(emoji)
+            except:
+                pass  # If parsing fails, keep original string
         self.emoji = emoji
         self.default = default
 
@@ -129,6 +135,12 @@ class Button:
         self.label = label
         self.custom_id = custom_id
         self.style = style
+        # Auto-parse custom emoji strings like <:name:id> or <a:name:id>
+        if emoji and isinstance(emoji, str) and emoji.startswith("<"):
+            try:
+                emoji = hikari.CustomEmoji.parse(emoji)
+            except:
+                pass  # If parsing fails, keep original string
         self.emoji = emoji
         self.disabled = disabled
 
@@ -159,6 +171,12 @@ class LinkButton:
     ):
         self.label = label
         self.url = url
+        # Auto-parse custom emoji strings like <:name:id> or <a:name:id>
+        if emoji and isinstance(emoji, str) and emoji.startswith("<"):
+            try:
+                emoji = hikari.CustomEmoji.parse(emoji)
+            except:
+                pass  # If parsing fails, keep original string
         self.emoji = emoji
         self.disabled = disabled
 
