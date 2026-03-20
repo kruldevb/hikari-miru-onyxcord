@@ -193,6 +193,12 @@ class OnyxModal(_MiruModal):
         super().__init__(title=title, custom_id=custom_id, timeout=timeout)
         logger.debug(f"✅ Modal {self.__class__.__name__} initialized with custom_id: {self.custom_id}")
 
+        # Auto-build ModalBuilder fields if present
+        modal_builder = getattr(self, "modal", None)
+        if modal_builder is not None and hasattr(modal_builder, "build"):
+            logger.debug(f"🔧 Building ModalBuilder fields for {self.__class__.__name__}")
+            modal_builder.build(self)
+
         _global_registry.register(self)
 
     async def _handle_submit(self, interaction: hikari.ModalInteraction, raw_data: dict[str, t.Any] | None = None) -> None:

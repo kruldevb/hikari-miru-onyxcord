@@ -62,6 +62,17 @@ from miru.onyx.items import (
 # Modal system
 from miru.onyx.modal import OnyxModal, OnyxModalRegistry, install_modal_handler
 
+# ModalBuilder system (NEW!)
+from miru.onyx.fields import (
+    ModalBuilder,
+    Text,
+    File,
+    Radio,
+    CheckboxGroupField,
+    CheckboxField,
+    ModalData,
+)
+
 __all__ = [
     # Version
     "__version__",
@@ -110,4 +121,12 @@ __all__ = [
     "OnyxModal",
     "OnyxModalRegistry",
     "install_modal_handler",
+    # ModalBuilder system (NEW!)
+    "ModalBuilder",
+    "Text",
+    "File",
+    "Radio",
+    "CheckboxGroupField",
+    "CheckboxField",
+    "ModalData",
 ]
