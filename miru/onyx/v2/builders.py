@@ -262,12 +262,24 @@ class Section:
 
     Layout: [text content] [accessory]
 
+    IMPORTANT: Discord's Section component only accepts ONE TextDisplay.
+    If you pass multiple TextDisplay components, they will be automatically
+    combined into a single TextDisplay with line breaks (\n) between them.
+
     Example:
-        # With button
+        # Single text (recommended)
         section = Section(
             TextDisplay("Never trust a lizard with a banana."),
             accessory=Button("Friendly Monkey", "btn_id")
         )
+
+        # Multiple texts (auto-combined with \n)
+        section = Section(
+            TextDisplay("# Welcome!"),
+            TextDisplay("Click the button to start."),
+            accessory=Button("Start", "btn_id")
+        )
+        # Results in: "# Welcome!\nClick the button to start."
 
         # With link button
         section = Section(
@@ -279,13 +291,6 @@ class Section:
         section = Section(
             TextDisplay("Some description text"),
             accessory=Thumbnail("https://example.com/image.png")
-        )
-
-        # Multiple text displays
-        section = Section(
-            TextDisplay("Line 1"),
-            TextDisplay("Line 2"),
-            accessory=Button("Click", "btn_id")
         )
     """
 
@@ -300,9 +305,18 @@ class Section:
         self.accessory = accessory
 
     def build(self) -> hikari.impl.SectionComponentBuilder:
+        # Discord's Section only accepts ONE TextDisplay
+        # If multiple are provided, combine them with line breaks
+        if len(self.components) == 1:
+            text_component = self.components[0]
+        else:
+            # Combine multiple TextDisplay into one with \n
+            combined_text = "\n".join(comp.content for comp in self.components)
+            text_component = TextDisplay(combined_text)
+        
         return hikari.impl.SectionComponentBuilder(
             accessory=self.accessory.build(),
-            components=[comp.build() for comp in self.components],
+            components=[text_component.build()],
         )
 
 
