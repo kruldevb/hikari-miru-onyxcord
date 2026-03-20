@@ -72,13 +72,20 @@ class SelectOption:
         self.default = default
 
     def build(self) -> hikari.impl.SelectOptionBuilder:
-        return hikari.impl.SelectOptionBuilder(
-            label=self.label,
-            value=self.value,
-            description=self.description,
-            emoji=self.emoji,
-            is_default=self.default,
-        )
+        # Only include emoji if it's not None
+        kwargs = {
+            "label": self.label,
+            "value": self.value,
+            "is_default": self.default,
+        }
+        
+        if self.description is not None:
+            kwargs["description"] = self.description
+        
+        if self.emoji is not None:
+            kwargs["emoji"] = self.emoji
+        
+        return hikari.impl.SelectOptionBuilder(**kwargs)
 
 
 class SelectMenu:
@@ -126,13 +133,18 @@ class Button:
         self.disabled = disabled
 
     def build(self) -> hikari.impl.InteractiveButtonBuilder:
-        return hikari.impl.InteractiveButtonBuilder(
-            style=self.style,
-            label=self.label,
-            custom_id=self.custom_id,
-            emoji=self.emoji,
-            is_disabled=self.disabled,
-        )
+        kwargs = {
+            "style": self.style,
+            "label": self.label,
+            "custom_id": self.custom_id,
+            "is_disabled": self.disabled,
+        }
+        
+        # Only include emoji if it's not None
+        if self.emoji is not None:
+            kwargs["emoji"] = self.emoji
+        
+        return hikari.impl.InteractiveButtonBuilder(**kwargs)
 
 
 class LinkButton:
@@ -151,12 +163,17 @@ class LinkButton:
         self.disabled = disabled
 
     def build(self) -> hikari.impl.LinkButtonBuilder:
-        return hikari.impl.LinkButtonBuilder(
-            url=self.url,
-            label=self.label,
-            emoji=self.emoji,
-            is_disabled=self.disabled,
-        )
+        kwargs = {
+            "url": self.url,
+            "label": self.label,
+            "is_disabled": self.disabled,
+        }
+        
+        # Only include emoji if it's not None
+        if self.emoji is not None:
+            kwargs["emoji"] = self.emoji
+        
+        return hikari.impl.LinkButtonBuilder(**kwargs)
 
 
 class ActionRow:
