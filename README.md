@@ -33,7 +33,7 @@ As modificações permitem que o miru trabalhe em conjunto com o OnyxCord para c
 ### A partir do Git (Recomendado para OnyxCord)
 
 ```sh
-pip install git+https://github.com/SEU_USUARIO/hikari-miru-onyxcord.git
+pip install git+https://github.com/kruldevb/hikari-miru-onyxcord.git
 ```
 
 ### Desenvolvimento Local
