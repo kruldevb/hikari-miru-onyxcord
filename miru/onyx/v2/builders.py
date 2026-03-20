@@ -1,0 +1,370 @@
+"""Simplified builders for Hikari Components v2.
+
+Includes Section and Thumbnail components (NEW - not in original OnyxCord).
+
+Example:
+    # Section with button accessory
+    section = Section(
+        TextDisplay("Never trust a lizard with a banana."),
+        accessory=Button("Friendly Monkey", "btn_id")
+    )
+
+    # Section with thumbnail accessory
+    section = Section(
+        TextDisplay("Some text here"),
+        accessory=Thumbnail("https://example.com/image.png")
+    )
+
+    # Section with link button accessory
+    section = Section(
+        TextDisplay("Click the link!"),
+        accessory=LinkButton("Google", "https://google.com")
+    )
+"""
+
+from typing import Optional, Union, List, Any
+import hikari
+
+
+class TextDisplay:
+    """Simplified TextDisplay component builder."""
+
+    def __init__(self, content: str):
+        self.content = content
+
+    def build(self) -> hikari.impl.TextDisplayComponentBuilder:
+        return hikari.impl.TextDisplayComponentBuilder(content=self.content)
+
+
+class Separator:
+    """Simplified Separator component builder."""
+
+    def __init__(
+        self,
+        visible: bool = True,
+        spacing: hikari.SpacingType = hikari.SpacingType.SMALL,
+    ):
+        self.visible = visible
+        self.spacing = spacing
+
+    def build(self) -> hikari.impl.SeparatorComponentBuilder:
+        return hikari.impl.SeparatorComponentBuilder(
+            divider=self.visible,
+            spacing=self.spacing,
+        )
+
+
+class SelectOption:
+    """Simplified SelectOption builder."""
+
+    def __init__(
+        self,
+        label: str,
+        value: str,
+        description: Optional[str] = None,
+        emoji: Optional[Union[str, hikari.Emoji]] = None,
+        default: bool = False,
+    ):
+        self.label = label
+        self.value = value
+        self.description = description
+        self.emoji = emoji
+        self.default = default
+
+    def build(self) -> hikari.impl.SelectOptionBuilder:
+        return hikari.impl.SelectOptionBuilder(
+            label=self.label,
+            value=self.value,
+            description=self.description,
+            emoji=self.emoji,
+            is_default=self.default,
+        )
+
+
+class SelectMenu:
+    """Simplified SelectMenu builder."""
+
+    def __init__(
+        self,
+        custom_id: str,
+        options: List[SelectOption],
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+    ):
+        self.custom_id = custom_id
+        self.options = options
+        self.placeholder = placeholder
+        self.min_values = min_values
+        self.max_values = max_values
+
+    def build(self) -> hikari.impl.TextSelectMenuBuilder:
+        return hikari.impl.TextSelectMenuBuilder(
+            custom_id=self.custom_id,
+            options=[opt.build() for opt in self.options],
+            placeholder=self.placeholder,
+            min_values=self.min_values,
+            max_values=self.max_values,
+        )
+
+
+class Button:
+    """Simplified interactive Button builder."""
+
+    def __init__(
+        self,
+        label: str,
+        custom_id: str,
+        style: hikari.ButtonStyle = hikari.ButtonStyle.PRIMARY,
+        emoji: Optional[Union[str, hikari.Emoji]] = None,
+        disabled: bool = False,
+    ):
+        self.label = label
+        self.custom_id = custom_id
+        self.style = style
+        self.emoji = emoji
+        self.disabled = disabled
+
+    def build(self) -> hikari.impl.InteractiveButtonBuilder:
+        return hikari.impl.InteractiveButtonBuilder(
+            style=self.style,
+            label=self.label,
+            custom_id=self.custom_id,
+            emoji=self.emoji,
+            is_disabled=self.disabled,
+        )
+
+
+class LinkButton:
+    """Simplified link Button builder."""
+
+    def __init__(
+        self,
+        label: str,
+        url: str,
+        emoji: Optional[Union[str, hikari.Emoji]] = None,
+        disabled: bool = False,
+    ):
+        self.label = label
+        self.url = url
+        self.emoji = emoji
+        self.disabled = disabled
+
+    def build(self) -> hikari.impl.LinkButtonBuilder:
+        return hikari.impl.LinkButtonBuilder(
+            url=self.url,
+            label=self.label,
+            emoji=self.emoji,
+            is_disabled=self.disabled,
+        )
+
+
+class ActionRow:
+    """Simplified ActionRow builder."""
+
+    def __init__(self, *components: Union[Button, LinkButton, SelectMenu]):
+        self.components = components
+
+    def build(self) -> hikari.impl.MessageActionRowBuilder:
+        return hikari.impl.MessageActionRowBuilder(
+            components=[comp.build() for comp in self.components]
+        )
+
+
+class MediaGalleryItem:
+    """Simplified MediaGalleryItem builder."""
+
+    def __init__(
+        self,
+        media: str,
+        description: Optional[str] = None,
+        spoiler: bool = False,
+    ):
+        self.media = media
+        self.description = description
+        self.spoiler = spoiler
+
+    def build(self) -> hikari.impl.MediaGalleryItemBuilder:
+        return hikari.impl.MediaGalleryItemBuilder(
+            media=self.media,
+            description=self.description,
+            spoiler=self.spoiler,
+        )
+
+
+class MediaGallery:
+    """Simplified MediaGallery builder."""
+
+    def __init__(self, *items: MediaGalleryItem):
+        self.items = items
+
+    def build(self) -> hikari.impl.MediaGalleryComponentBuilder:
+        return hikari.impl.MediaGalleryComponentBuilder(
+            items=[item.build() for item in self.items]
+        )
+
+
+class File:
+    """Simplified File component builder."""
+
+    def __init__(
+        self,
+        file: str,
+        description: Optional[str] = None,
+        spoiler: bool = False,
+    ):
+        self.file = file
+        self.description = description
+        self.spoiler = spoiler
+
+    def build(self) -> hikari.impl.FileComponentBuilder:
+        return hikari.impl.FileComponentBuilder(
+            file=self.file,
+            description=self.description,
+            spoiler=self.spoiler,
+        )
+
+
+class Thumbnail:
+    """Simplified Thumbnail component builder.
+
+    Can be used standalone or as an accessory in a Section component.
+
+    Example:
+        # As Section accessory
+        section = Section(
+            TextDisplay("Some text"),
+            accessory=Thumbnail("https://example.com/image.png")
+        )
+    """
+
+    def __init__(
+        self,
+        media: str,
+        description: Optional[str] = None,
+        spoiler: bool = False,
+    ):
+        self.media = media
+        self.description = description
+        self.spoiler = spoiler
+
+    def build(self) -> hikari.impl.ThumbnailComponentBuilder:
+        return hikari.impl.ThumbnailComponentBuilder(
+            media=self.media,
+        )
+
+
+class Section:
+    """Simplified Section component builder.
+
+    A Section displays text content alongside an accessory component
+    (Button, LinkButton, or Thumbnail) side by side.
+
+    Layout: [text content] [accessory]
+
+    Example:
+        # With button
+        section = Section(
+            TextDisplay("Never trust a lizard with a banana."),
+            accessory=Button("Friendly Monkey", "btn_id")
+        )
+
+        # With link button
+        section = Section(
+            TextDisplay("Click the link!"),
+            accessory=LinkButton("Google", "https://google.com")
+        )
+
+        # With thumbnail
+        section = Section(
+            TextDisplay("Some description text"),
+            accessory=Thumbnail("https://example.com/image.png")
+        )
+
+        # Multiple text displays
+        section = Section(
+            TextDisplay("Line 1"),
+            TextDisplay("Line 2"),
+            accessory=Button("Click", "btn_id")
+        )
+    """
+
+    def __init__(
+        self,
+        *components: TextDisplay,
+        accessory: Union[Button, LinkButton, Thumbnail],
+    ):
+        if not components:
+            raise ValueError("Section must have at least one TextDisplay component")
+        self.components = components
+        self.accessory = accessory
+
+    def build(self) -> hikari.impl.SectionComponentBuilder:
+        return hikari.impl.SectionComponentBuilder(
+            accessory=self.accessory.build(),
+            components=[comp.build() for comp in self.components],
+        )
+
+
+class Container:
+    """Simplified Container builder with pythonic syntax.
+
+    Container is like a styled "embed" that groups components together with an accent color.
+
+    IMPORTANT: Containers CANNOT be nested inside other containers.
+
+    Example:
+        container = Container(
+            TextDisplay("# Title"),
+            Separator(),
+            Section(
+                TextDisplay("Text with button"),
+                accessory=Button("Click", "btn")
+            ),
+            ActionRow(Button("Click", "btn_id")),
+            accent_color="#8CC4C2"
+        )
+    """
+
+    def __init__(
+        self,
+        *components: Union[
+            TextDisplay,
+            Separator,
+            ActionRow,
+            MediaGallery,
+            File,
+            Section,
+        ],
+        accent_color: Optional[Union[str, hikari.Color]] = None,
+    ):
+        for comp in components:
+            if isinstance(comp, Container):
+                raise ValueError(
+                    "Cannot nest Container inside another Container. "
+                    "Containers are like styled 'embeds' and cannot be nested. "
+                    "Use components outside the container if you need multiple sections."
+                )
+
+        self.components = components
+        self.accent_color = accent_color
+
+    def build(self) -> hikari.impl.ContainerComponentBuilder:
+        color = None
+        if self.accent_color:
+            if isinstance(self.accent_color, str):
+                color = hikari.Color.from_hex_code(self.accent_color)
+            else:
+                color = self.accent_color
+
+        built_components = []
+        for comp in self.components:
+            built_components.append(comp.build())
+
+        return hikari.impl.ContainerComponentBuilder(
+            accent_color=color,
+            components=built_components,
+        )
+
+    def __repr__(self) -> str:
+        return f"Container(components={len(self.components)}, accent_color={self.accent_color})"
