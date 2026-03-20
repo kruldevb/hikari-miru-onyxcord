@@ -24,7 +24,7 @@ class StringSelectOption:
         Developer-defined value (max 100 characters)
     description : str | None
         Additional description (max 100 characters)
-    emoji : str | None
+    emoji : str | hikari.Emoji | None
         Emoji for the option
     default : bool
         Whether this option is selected by default
@@ -36,21 +36,29 @@ class StringSelectOption:
         label: str,
         value: str,
         description: str | None = None,
-        emoji: str | None = None,
+        emoji: str | hikari.Emoji | None = None,
         default: bool = False,
     ) -> None:
         self.label = label
         self.value = value
         self.description = description
-        self.emoji = emoji
+        self.emoji = hikari.Emoji.parse(emoji) if isinstance(emoji, str) else emoji
         self.default = default
 
     def to_payload(self) -> dict[str, t.Any]:
         payload: dict[str, t.Any] = {"label": self.label, "value": self.value}
         if self.description:
             payload["description"] = self.description
-        if self.emoji:
-            payload["emoji"] = {"name": self.emoji}
+        
+        emoji = self.emoji
+        if emoji:
+            if isinstance(emoji, hikari.CustomEmoji):
+                payload["emoji"] = {"id": str(emoji.id), "name": emoji.name, "animated": emoji.is_animated}
+            elif isinstance(emoji, hikari.UnicodeEmoji):
+                payload["emoji"] = {"name": emoji.name}
+            else:
+                payload["emoji"] = {"name": str(emoji)}
+                
         if self.default:
             payload["default"] = self.default
         return payload
