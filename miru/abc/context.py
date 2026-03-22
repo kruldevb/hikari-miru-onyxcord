@@ -35,6 +35,9 @@ def _sanitize_miru_params(
 ]:
     """Sanitize Miru response parameters to avoid sending empty/unwanted values.
     
+    When parameters are not explicitly passed (UNDEFINED), they are converted to None
+    to clear previous values instead of keeping them.
+    
     Args:
         content: Message content
         embed: Single embed
@@ -45,23 +48,28 @@ def _sanitize_miru_params(
     Returns:
         Tuple of sanitized parameters
     """
-    # Sanitize content - convert empty strings/None to UNDEFINED
-    final_content = hikari.UNDEFINED if (content is not hikari.UNDEFINED and not content) else content
+    # Sanitize content - convert UNDEFINED/empty strings/None to None (to clear)
+    if content is hikari.UNDEFINED or not content:
+        final_content = None
+    else:
+        final_content = content
     
-    # Sanitize embed - convert None to UNDEFINED
-    final_embed = hikari.UNDEFINED if embed is None else embed
+    # Sanitize embed - convert UNDEFINED/None to None
+    final_embed = None if embed is hikari.UNDEFINED or embed is None else embed
     
-    # Sanitize embeds - convert empty lists/None to UNDEFINED
-    final_embeds = hikari.UNDEFINED
-    if embeds is not hikari.UNDEFINED and embeds is not None and len(embeds) > 0:
+    # Sanitize embeds - convert UNDEFINED/empty lists/None to None
+    if embeds is hikari.UNDEFINED or embeds is None or (isinstance(embeds, (list, tuple)) and len(embeds) == 0):
+        final_embeds = None
+    else:
         final_embeds = embeds
     
-    # Sanitize component - convert None to UNDEFINED
-    final_component = hikari.UNDEFINED if component is None else component
+    # Sanitize component - convert UNDEFINED/None to None
+    final_component = None if component is hikari.UNDEFINED or component is None else component
     
-    # Sanitize components - convert empty lists/None to UNDEFINED
-    final_components = hikari.UNDEFINED
-    if components is not hikari.UNDEFINED and components is not None and len(components) > 0:
+    # Sanitize components - convert UNDEFINED/empty lists/None to None
+    if components is hikari.UNDEFINED or components is None or (isinstance(components, (list, tuple)) and len(components) == 0):
+        final_components = None
+    else:
         final_components = components
     
     return final_content, final_embed, final_embeds, final_component, final_components
