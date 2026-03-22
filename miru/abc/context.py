@@ -54,14 +54,20 @@ def _sanitize_miru_params(
     else:
         final_content = content
     
-    # Sanitize embed - convert UNDEFINED/None to None
-    final_embed = None if embed is hikari.UNDEFINED or embed is None else embed
-    
-    # Sanitize embeds - convert UNDEFINED/empty lists/None to None
-    if embeds is hikari.UNDEFINED or embeds is None or (isinstance(embeds, (list, tuple)) and len(embeds) == 0):
+    # Sanitize embeds - Hikari doesn't allow both embed and embeds
+    # Priority: embeds > embed
+    if embeds is not hikari.UNDEFINED and embeds is not None and (isinstance(embeds, (list, tuple)) and len(embeds) > 0):
+        # If embeds is provided, use it and set embed to None
+        final_embeds = embeds
+        final_embed = None
+    elif embed is not hikari.UNDEFINED and embed is not None:
+        # If only embed is provided, use it and set embeds to None
+        final_embed = embed
         final_embeds = None
     else:
-        final_embeds = embeds
+        # Both are UNDEFINED or None, set both to None
+        final_embed = None
+        final_embeds = None
     
     # Sanitize components - Hikari doesn't allow both component and components
     # Priority: components > component
@@ -109,12 +115,16 @@ class _ResponseGlue:
             "tts": self.tts,
             "attachment": self.attachment,
             "attachments": self.attachments,
-            "embed": self.embed,
-            "embeds": self.embeds,
             "mentions_everyone": self.mentions_everyone,
             "user_mentions": self.user_mentions,
             "role_mentions": self.role_mentions,
         }
+        
+        # Only include embed OR embeds, never both (Hikari requirement)
+        if self.embeds is not None:
+            result["embeds"] = self.embeds
+        elif self.embed is not None:
+            result["embed"] = self.embed
         
         # Only include component OR components, never both (Hikari requirement)
         if self.components is not None:
