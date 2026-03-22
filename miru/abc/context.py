@@ -102,13 +102,11 @@ class _ResponseGlue:
     role_mentions: hikari.UndefinedOr[hikari.SnowflakeishSequence[hikari.PartialRole] | bool] = hikari.UNDEFINED
 
     def _to_dict(self) -> dict[str, t.Any]:
-        return {
+        result = {
             "response_type": self.response_type,
             "content": self.content,
             "flags": self.flags,
             "tts": self.tts,
-            "component": self.component,
-            "components": self.components,
             "attachment": self.attachment,
             "attachments": self.attachments,
             "embed": self.embed,
@@ -117,6 +115,14 @@ class _ResponseGlue:
             "user_mentions": self.user_mentions,
             "role_mentions": self.role_mentions,
         }
+        
+        # Only include component OR components, never both (Hikari requirement)
+        if self.components is not None:
+            result["components"] = self.components
+        elif self.component is not None:
+            result["component"] = self.component
+            
+        return result
 
     def _to_builder(self) -> hikari.api.InteractionMessageBuilder:
         components: list[hikari.api.ComponentBuilder] = list(self.components) if self.components else []
