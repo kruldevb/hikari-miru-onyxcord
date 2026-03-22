@@ -20,6 +20,53 @@ __all__ = ("Context", "InteractionResponse")
 logger = logging.getLogger("__name__")
 
 
+def _sanitize_miru_params(
+    content: hikari.UndefinedOr[t.Any] = hikari.UNDEFINED,
+    embed: hikari.UndefinedOr[hikari.Embed] = hikari.UNDEFINED,
+    embeds: hikari.UndefinedOr[t.Sequence[hikari.Embed]] = hikari.UNDEFINED,
+    component: hikari.UndefinedOr[hikari.api.ComponentBuilder] = hikari.UNDEFINED,
+    components: hikari.UndefinedOr[t.Sequence[hikari.api.ComponentBuilder]] = hikari.UNDEFINED,
+) -> tuple[
+    hikari.UndefinedOr[t.Any],
+    hikari.UndefinedOr[hikari.Embed],
+    hikari.UndefinedOr[t.Sequence[hikari.Embed]],
+    hikari.UndefinedOr[hikari.api.ComponentBuilder],
+    hikari.UndefinedOr[t.Sequence[hikari.api.ComponentBuilder]],
+]:
+    """Sanitize Miru response parameters to avoid sending empty/unwanted values.
+    
+    Args:
+        content: Message content
+        embed: Single embed
+        embeds: Multiple embeds
+        component: Single component
+        components: Multiple components
+        
+    Returns:
+        Tuple of sanitized parameters
+    """
+    # Sanitize content - convert empty strings/None to UNDEFINED
+    final_content = hikari.UNDEFINED if (content is not hikari.UNDEFINED and not content) else content
+    
+    # Sanitize embed - convert None to UNDEFINED
+    final_embed = hikari.UNDEFINED if embed is None else embed
+    
+    # Sanitize embeds - convert empty lists/None to UNDEFINED
+    final_embeds = hikari.UNDEFINED
+    if embeds is not hikari.UNDEFINED and embeds is not None and len(embeds) > 0:
+        final_embeds = embeds
+    
+    # Sanitize component - convert None to UNDEFINED
+    final_component = hikari.UNDEFINED if component is None else component
+    
+    # Sanitize components - convert empty lists/None to UNDEFINED
+    final_components = hikari.UNDEFINED
+    if components is not hikari.UNDEFINED and components is not None and len(components) > 0:
+        final_components = components
+    
+    return final_content, final_embed, final_embeds, final_component, final_components
+
+
 @attr.define(slots=True, kw_only=True, frozen=True)
 class _ResponseGlue:
     """A glue object to allow for easy creation of responses in both REST and Gateway contexts."""
@@ -414,6 +461,11 @@ class Context(abc.ABC, t.Generic[InteractionT]):
         InteractionResponse
             A proxy object representing the response to the interaction.
         """
+        # Sanitize parameters to avoid sending empty/unwanted values
+        content, embed, embeds, component, components = _sanitize_miru_params(
+            content, embed, embeds, component, components
+        )
+        
         async with self._response_lock:
             if self._issued_response:
                 message = await self.interaction.execute(
@@ -589,6 +641,11 @@ class Context(abc.ABC, t.Generic[InteractionT]):
         InteractionResponse
             A proxy object representing the response to the interaction.
         """
+        # Sanitize parameters to avoid sending empty/unwanted values
+        content, embed, embeds, component, components = _sanitize_miru_params(
+            content, embed, embeds, component, components
+        )
+        
         async with self._response_lock:
             if self._issued_response:
                 message = await self.interaction.edit_initial_response(
