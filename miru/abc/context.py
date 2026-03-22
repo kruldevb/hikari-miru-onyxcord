@@ -498,20 +498,31 @@ class Context(abc.ABC, t.Generic[InteractionT]):
         
         async with self._response_lock:
             if self._issued_response:
-                message = await self.interaction.execute(
-                    content,
-                    tts=tts,
-                    component=component,
-                    components=components,
-                    attachment=attachment,
-                    attachments=attachments,
-                    embed=embed,
-                    embeds=embeds,
-                    mentions_everyone=mentions_everyone,
-                    user_mentions=user_mentions,
-                    role_mentions=role_mentions,
-                    flags=flags,
-                )
+                # Build kwargs ensuring only one of each pair is passed
+                kwargs = {
+                    "content": content,
+                    "tts": tts,
+                    "attachment": attachment,
+                    "attachments": attachments,
+                    "mentions_everyone": mentions_everyone,
+                    "user_mentions": user_mentions,
+                    "role_mentions": role_mentions,
+                    "flags": flags,
+                }
+                
+                # Only include embeds OR embed, never both
+                if embeds is not None:
+                    kwargs["embeds"] = embeds
+                elif embed is not None:
+                    kwargs["embed"] = embed
+                
+                # Only include components OR component, never both
+                if components is not None:
+                    kwargs["components"] = components
+                elif component is not None:
+                    kwargs["component"] = component
+                
+                message = await self.interaction.execute(**kwargs)
                 response = await self._create_response(message)
             else:
                 glue = _ResponseGlue(
@@ -678,18 +689,29 @@ class Context(abc.ABC, t.Generic[InteractionT]):
         
         async with self._response_lock:
             if self._issued_response:
-                message = await self.interaction.edit_initial_response(
-                    content,
-                    component=component,
-                    components=components,
-                    attachment=attachment,
-                    attachments=attachments,
-                    embed=embed,
-                    embeds=embeds,
-                    mentions_everyone=mentions_everyone,
-                    user_mentions=user_mentions,
-                    role_mentions=role_mentions,
-                )
+                # Build kwargs ensuring only one of each pair is passed
+                kwargs = {
+                    "content": content,
+                    "attachment": attachment,
+                    "attachments": attachments,
+                    "mentions_everyone": mentions_everyone,
+                    "user_mentions": user_mentions,
+                    "role_mentions": role_mentions,
+                }
+                
+                # Only include embeds OR embed, never both
+                if embeds is not None:
+                    kwargs["embeds"] = embeds
+                elif embed is not None:
+                    kwargs["embed"] = embed
+                
+                # Only include components OR component, never both
+                if components is not None:
+                    kwargs["components"] = components
+                elif component is not None:
+                    kwargs["component"] = component
+                
+                message = await self.interaction.edit_initial_response(**kwargs)
                 return await self._create_response(message)
 
             else:
