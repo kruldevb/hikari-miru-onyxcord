@@ -63,14 +63,20 @@ def _sanitize_miru_params(
     else:
         final_embeds = embeds
     
-    # Sanitize component - convert UNDEFINED/None to None
-    final_component = None if component is hikari.UNDEFINED or component is None else component
-    
-    # Sanitize components - convert UNDEFINED/empty lists/None to None
-    if components is hikari.UNDEFINED or components is None or (isinstance(components, (list, tuple)) and len(components) == 0):
+    # Sanitize components - Hikari doesn't allow both component and components
+    # Priority: components > component
+    if components is not hikari.UNDEFINED and components is not None and (isinstance(components, (list, tuple)) and len(components) > 0):
+        # If components is provided, use it and set component to None
+        final_components = components
+        final_component = None
+    elif component is not hikari.UNDEFINED and component is not None:
+        # If only component is provided, use it and set components to None
+        final_component = component
         final_components = None
     else:
-        final_components = components
+        # Both are UNDEFINED or None, set both to None
+        final_component = None
+        final_components = None
     
     return final_content, final_embed, final_embeds, final_component, final_components
 
